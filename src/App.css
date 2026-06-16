@@ -1,0 +1,25 @@
+body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+.sidebar-wrapper { max-height: calc(100vh - 40px); overflow-y: auto; padding-right: 4px; }
+.sidebar-wrapper::-webkit-scrollbar { width: 4px; }
+.sidebar-wrapper::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 4px; }
+.card { border: none; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.04); }
+.card-header { background: linear-gradient(135deg, #1a365d, #2a4365); color: white; padding: 10px 15px; border-top-left-radius: 10px !important; border-top-right-radius: 10px !important; }
+.form-label { margin-bottom: 2px; font-size: 0.8rem; font-weight: 700; color: #4a5568; }
+.form-control, .form-select { padding: 4px 8px; font-size: 0.85rem; border-radius: 6px; }
+.hint-text { font-size: 0.72rem; font-weight: 600; color: #38a169; }
+th { background-color: #2b6cb0 !important; color: white !important; text-align: center; font-size: 0.78rem; vertical-align: middle; padding: 8px 4px; }
+td { font-size: 0.85rem; padding: 8px 6px; }
+.number-cell { text-align: right; font-variant-numeric: tabular-nums; }
+.money-input { text-align: right; font-weight: 600; }
+.readonly-money { background-color: #edf2f7 !important; font-weight: bold; color: #2d3748; text-align: right; }
+.table-input { width: 110px; text-align: right; font-weight: 600; color: #3182ce; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 4px; font-size: 0.82rem; }
+.master-row { cursor: pointer; transition: background 0.15s; }
+.master-row:hover { background-color: #ebf8ff !important; }
+.detail-row { background-color: #f7fafc; }
+.sub-table { margin: 6px auto; width: 98%; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; }
+.sub-table th { background-color: #4a5568 !important; font-size: 0.75rem; padding: 4px 8px; }
+.sub-table td { font-size: 0.82rem; padding: 5px 8px; }
+.money-wrapper { position: relative; }
+.bank-autocomplete { position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; background: white; border: 1px solid #cbd5e0; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; margin-top: 2px; overflow: hidden; }
+.bank-autocomplete-item { padding: 6px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; font-size: 0.8rem; }
+.bank-autocomplete-item:hover { background-color: #ebf8ff; }
