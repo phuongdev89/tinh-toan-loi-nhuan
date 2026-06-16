@@ -40,7 +40,8 @@ export const calculatePeriodInterest = (params) => {
     nguonTienGoc = [],
     tienNoLai,
     laiSuatNoLaiNam,
-    hinhThucTraLaiNo
+    hinhThucTraLaiNo,
+    coThuLaiNo = true
   } = params;
 
   let totalInterestGoc = 0;
@@ -59,12 +60,14 @@ export const calculatePeriodInterest = (params) => {
     });
     
     // Luôn tính lãi nợ chủ nhà theo tháng để có số liệu, 
-    // nhưng việc có cộng vào tổng chi trả định kỳ hay không phụ thuộc vào hinhThucTraLaiNo
-    totalInterestNo += (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days;
+    // nhưng việc có cộng vào tổng chi trả định kỳ hay không phụ thuộc vào hinhThucTraLaiNo và coThuLaiNo
+    if (coThuLaiNo) {
+      totalInterestNo += (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days;
+    }
   }
 
   // tongPhaiTra phụ thuộc vào hình thức trả
-  const tongPhaiTra = Math.round(totalInterestGoc + (hinhThucTraLaiNo === 'thang' ? totalInterestNo : 0));
+  const tongPhaiTra = Math.round(totalInterestGoc + (hinhThucTraLaiNo === 'thang' && coThuLaiNo ? totalInterestNo : 0));
 
   return {
     goc: Math.round(totalInterestGoc),
@@ -84,15 +87,23 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
     laiSuatDauTu,
     tienDauTuBanDau,
     blockDauTu,
+    soChuKyDauTu,
+    coThuLaiNo,
+    coSanPhamDauTu,
     hinhThucTraLaiNo
   } = inputs;
+
+  const soChuKy = parseInt(soChuKyDauTu) || 1;
+  const block = parseInt(blockDauTu) || 6;
+  const totalMonthsProject = soChuKy * block;
 
   const tongTienGoc = nguonTienGoc.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
   const laiSuatNoLaiNam = (parseFloat(laiSuatNoLai) || 0) / 100;
   const laiSuatDauTuThang = (parseFloat(laiSuatDauTu) || 0) / 100;
-  const tienNoLai = Math.max(0, giaBds - tienPhaiTra);
+  const tienNoLai = coSanPhamDauTu ? Math.max(0, giaBds - tienPhaiTra) : 0;
+  const giaBdsThucTe = coSanPhamDauTu ? giaBds : 0;
 
-  const monthData = getMonthData(ngayBatDau, thoiGianNo);
+  const monthData = getMonthData(ngayBatDau, totalMonthsProject);
   
   const commonParams = {
     monthData,
@@ -100,13 +111,15 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
     tienNoLai,
     laiSuatNoLaiNam,
     hinhThucTraLaiNo,
-    totalMonths: thoiGianNo
+    coThuLaiNo,
+    totalMonths: totalMonthsProject
   };
 
   const lai1Thang = calculatePeriodInterest({ ...commonParams, startMonth: 0, duration: 1 });
-  const lai1Block = calculatePeriodInterest({ ...commonParams, startMonth: 0, duration: parseInt(blockDauTu) });
+  const lai1Block = calculatePeriodInterest({ ...commonParams, startMonth: 0, duration: block });
 
-  const quyTienMatThuaBanDau = tongTienGoc - tienPhaiTra - tienDauTuBanDau;
+  const tienPhaiTraThucTe = coSanPhamDauTu ? tienPhaiTra : 0;
+  const quyTienMatThuaBanDau = tongTienGoc - tienPhaiTraThucTe - tienDauTuBanDau;
   
   const results = [];
   const withdrawals = { ...manualWithdrawals };
@@ -114,18 +127,18 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
   let currentCash = quyTienMatThuaBanDau;
   let currentInvested = tienDauTuBanDau;
 
-  for (let thang = parseInt(blockDauTu); thang <= thoiGianNo; thang += parseInt(blockDauTu)) {
-    const isLastBlock = (thang === thoiGianNo || (thang + parseInt(blockDauTu)) > thoiGianNo);
-    const startMonthIndex = thang - parseInt(blockDauTu);
-    const actualDuration = isLastBlock ? (thoiGianNo - startMonthIndex) : parseInt(blockDauTu);
+  for (let thang = block; thang <= totalMonthsProject; thang += block) {
+    const isLastBlock = (thang === totalMonthsProject || (thang + block) > totalMonthsProject);
+    const startMonthIndex = thang - block;
+    const actualDuration = isLastBlock ? (totalMonthsProject - startMonthIndex) : block;
 
     const currentCashStart = currentCash;
     const laiBlockNay = calculatePeriodInterest({ ...commonParams, startMonth: startMonthIndex, duration: actualDuration });
 
     // Tăng trưởng giá trị tài sản 1% mỗi tháng (tuyến tính theo yêu cầu: 1 + 0.01 * thang)
-    const giaTriTaiSanCuoiChuKy = giaBds * (1 + 0.01 * thang);
+    const giaTriTaiSanCuoiChuKy = coSanPhamDauTu ? giaBdsThucTe * (1 + 0.01 * thang) : 0;
 
-    const nextBlockDuration = Math.min(parseInt(blockDauTu), thoiGianNo - thang);
+    const nextBlockDuration = Math.min(block, totalMonthsProject - thang);
     const laiBlockTiepTheo = isLastBlock ? { tong: 0 } : calculatePeriodInterest({ ...commonParams, startMonth: thang, duration: nextBlockDuration });
 
     const vonDauTuDauChuKy = currentInvested;
@@ -149,7 +162,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
 
     if (isLastBlock) {
       let totalInterestNoAccumulated = 0;
-      if (hinhThucTraLaiNo === 'cuoi') {
+      if (hinhThucTraLaiNo === 'cuoi' && coThuLaiNo) {
         for (let k = 0; k < monthData.length; k++) {
           totalInterestNoAccumulated += (tienNoLai * laiSuatNoLaiNam / monthData[k].daysInYear) * monthData[k].days;
         }
@@ -158,7 +171,8 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
     }
 
     const finalCashInPocket = isLastBlock ? (cashAtEndBeforeWithdraw + userWithdraw) : cashAtEndBeforeWithdraw;
-    const gocThucTe = finalCashInPocket - tongTienGoc - (isLastBlock ? 0 : tienNoLai);
+    const noGocChuNhaHienTai = (isLastBlock || !coSanPhamDauTu) ? 0 : tienNoLai;
+    const gocThucTe = finalCashInPocket - tongTienGoc - noGocChuNhaHienTai;
     const totalNetCapital = gocThucTe + giaTriTaiSanCuoiChuKy;
 
     // Sub table logic
@@ -169,7 +183,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
       const data = monthData[globalMonthIdx];
       
       const currentMonthGlobal = startMonthIndex + t;
-      const giaTriTaiSanThang = giaBds * (1 + 0.01 * currentMonthGlobal);
+      const giaTriTaiSanThang = coSanPhamDauTu ? giaBdsThucTe * (1 + 0.01 * currentMonthGlobal) : 0;
       
       let laiGocThang = 0;
       nguonTienGoc.forEach(nguon => {
@@ -179,7 +193,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
       });
 
       let laiNoThangThucTe = 0;
-      if (hinhThucTraLaiNo === 'thang') {
+      if (hinhThucTraLaiNo === 'thang' && coThuLaiNo) {
         laiNoThangThucTe = (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days;
       }
       
@@ -190,15 +204,17 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
       let cashEnd = runningCash;
 
       let noGocChuNhaSub = tienNoLai;
-      if (isLastBlock && t === actualDuration) {
-        // Cuối dự án: trả gốc + toàn bộ lãi nợ tích lũy nếu chọn tất toán cuối
+      if ((isLastBlock && t === actualDuration) || !coSanPhamDauTu) {
+        // Cuối dự án hoặc không có sản phẩm: không còn nợ gốc
         let totalInterestNoAccumulated = 0;
-        if (hinhThucTraLaiNo === 'cuoi') {
+        if (isLastBlock && hinhThucTraLaiNo === 'cuoi' && coThuLaiNo) {
           for (let k = 0; k < monthData.length; k++) {
             totalInterestNoAccumulated += (tienNoLai * laiSuatNoLaiNam / monthData[k].daysInYear) * monthData[k].days;
           }
         }
-        cashEnd -= (tienNoLai + Math.round(totalInterestNoAccumulated));
+        if (isLastBlock) {
+            cashEnd -= (tienNoLai + Math.round(totalInterestNoAccumulated));
+        }
         noGocChuNhaSub = 0;
       }
 
@@ -234,7 +250,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
       tongVonThucTeRong: totalNetCapital,
       subTable,
       isLastBlock,
-      totalInterestNoAccumulated: isLastBlock && hinhThucTraLaiNo === 'cuoi' ? Math.round(
+      totalInterestNoAccumulated: isLastBlock && hinhThucTraLaiNo === 'cuoi' && coThuLaiNo ? Math.round(
         monthData.reduce((acc, data) => acc + (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days, 0)
       ) : 0
     });
@@ -249,6 +265,6 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
     tienNoLai,
     lai1Thang: lai1Thang.tong,
     lai1Block: lai1Block.tong,
-    maxDauTu: Math.round(Math.max(0, tongTienGoc - tienPhaiTra - lai1Block.tong))
+    maxDauTu: Math.round(Math.max(0, tongTienGoc - (coSanPhamDauTu ? tienPhaiTra : 0) - lai1Block.tong))
   };
 };

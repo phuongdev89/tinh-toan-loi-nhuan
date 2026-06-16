@@ -16,6 +16,9 @@ function App() {
     laiSuatDauTu: 2,
     tienDauTuBanDau: 1000000000,
     blockDauTu: 6,
+    soChuKyDauTu: 2,
+    coThuLaiNo: true,
+    coSanPhamDauTu: true,
     hinhThucTraLaiNo: 'thang'
   });
 
@@ -27,7 +30,7 @@ function App() {
 
   // Reset withdrawals if core inputs change (except initial investment)
   const handleInputsChange = (newInputs) => {
-    const coreFieldsChanged = ['ngayBatDau', 'nguonTienGoc', 'giaBds', 'tienPhaiTra', 'laiSuatNoLai', 'thoiGianNo', 'hinhThucTraLaiNo', 'blockDauTu'].some(
+    const coreFieldsChanged = ['ngayBatDau', 'nguonTienGoc', 'giaBds', 'tienPhaiTra', 'laiSuatNoLai', 'thoiGianNo', 'hinhThucTraLaiNo', 'blockDauTu', 'soChuKyDauTu', 'coThuLaiNo', 'coSanPhamDauTu'].some(
       field => JSON.stringify(newInputs[field]) !== JSON.stringify(inputs[field])
     );
     
@@ -59,7 +62,7 @@ function App() {
             <h4 className="mb-0">Bảng Theo Dõi Dòng Tiền & Lợi Nhuận</h4>
             <div className="badge bg-primary p-2">
               <i className="fa-solid fa-calendar-days me-2"></i>
-              Thời gian: {inputs.thoiGianNo} tháng
+              Thời gian: {inputs.soChuKyDauTu * inputs.blockDauTu} tháng
             </div>
           </div>
           <div className="d-flex justify-content-between align-items-center mb-4">

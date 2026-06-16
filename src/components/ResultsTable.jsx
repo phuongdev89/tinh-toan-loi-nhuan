@@ -12,9 +12,10 @@ const ResultsTable = ({ results, onUpdateWithdrawal }) => {
             <th className="text-end">Vốn Đầu Tư</th>
             <th className="text-end text-primary">Lãi phải trả trong chu kỳ</th>
             <th className="text-end">Tiền mặt có sẵn đầu chu kỳ</th>
-            <th className="text-end text-success" style={{ width: '180px' }}>Cần rút về lúc cuối chu kỳ</th>
             <th className="text-end fw-bold">Gốc thực tế</th>
-            <th className="text-end fw-bold">Giá trị tài sản cuối chu kỳ</th>
+            {results[0]?.giaTriTaiSanCuoiChuKy > 0 && (
+              <th className="text-end fw-bold">Giá trị tài sản cuối chu kỳ</th>
+            )}
             <th className="text-end fw-bold">Tổng vốn ròng</th>
           </tr>
         </thead>
@@ -28,32 +29,21 @@ const ResultsTable = ({ results, onUpdateWithdrawal }) => {
                 <td className="text-end">{formatMoneyStr(row.vonDauTuDauChuKy)}</td>
                 <td className="text-end text-primary">{formatMoneyStr(row.laiTiepTheo)}</td>
                 <td className="text-end">{formatMoneyStr(row.tienMatDangGiutaiKet)}</td>
-                <td className="text-end">
-                  <div className="input-group input-group-sm justify-content-end">
-                    <input 
-                      type="text" 
-                      className="form-control text-end border-success text-success fw-bold"
-                      style={{ maxWidth: '140px' }}
-                      value={formatMoneyStr(row.rutVe).replace(' đ', '')}
-                      onChange={(e) => onUpdateWithdrawal(row.thang, parseMoney(e.target.value))}
-                      disabled={row.isLastBlock}
-                    />
-                    <span className="input-group-text bg-success text-white border-success">đ</span>
-                  </div>
-                </td>
                 <td className={`text-end fw-bold ${row.gocThucTe >= 0 ? 'text-success' : 'text-danger'}`}>
                   {formatMoneyStr(row.gocThucTe)}
                 </td>
-                <td className="text-end fw-bold text-info">
-                  {formatMoneyStr(row.giaTriTaiSanCuoiChuKy)}
-                </td>
+                {row.giaTriTaiSanCuoiChuKy > 0 && (
+                  <td className="text-end fw-bold text-info">
+                    {formatMoneyStr(row.giaTriTaiSanCuoiChuKy)}
+                  </td>
+                )}
                 <td className={`text-end fw-bold ${row.tongVonThucTeRong >= 0 ? 'text-success' : 'text-danger'}`}>
                   {formatMoneyStr(row.tongVonThucTeRong)}
                 </td>
               </tr>
               {row.subTable && (
                 <tr className="detail-row">
-                  <td colSpan="8" className="p-0 border-0">
+                  <td colSpan={results[0]?.giaTriTaiSanCuoiChuKy > 0 ? "7" : "6"} className="p-0 border-0">
                     <div className="px-5 py-3">
                       <div className="sub-table p-3">
                         <div className="d-flex gap-4 mb-3 border-bottom pb-2">
@@ -65,7 +55,17 @@ const ResultsTable = ({ results, onUpdateWithdrawal }) => {
                           <div className="d-flex align-items-center gap-2">
                             <ArrowDownCircle size={18} className="text-primary" />
                             <small className="text-muted">Cần rút về:</small>
-                            <span className="fw-bold text-primary">{formatMoneyStr(row.rutVe)}</span>
+                            <div className="input-group input-group-sm justify-content-end">
+                              <input
+                                  type="text"
+                                  className="form-control text-end border-success text-success fw-bold"
+                                  style={{ maxWidth: '140px' }}
+                                  value={formatMoneyStr(row.rutVe).replace(' đ', '')}
+                                  onChange={(e) => onUpdateWithdrawal(row.thang, parseMoney(e.target.value))}
+                                  disabled={row.isLastBlock}
+                              />
+                              <span className="input-group-text bg-success text-white border-success">đ</span>
+                            </div>
                           </div>
                           {row.isLastBlock && row.totalInterestNoAccumulated > 0 && (
                             <div className="d-flex align-items-center gap-2">
@@ -84,7 +84,9 @@ const ResultsTable = ({ results, onUpdateWithdrawal }) => {
                               <th className="text-end text-danger">Lãi trả trong tháng</th>
                               <th className="text-end">Tiền mặt cuối tháng</th>
                               <th className="text-end fw-bold">Gốc thực tế</th>
-                              <th className="text-end fw-bold">Giá trị tài sản</th>
+                              {row.subTable[0]?.giaTriTaiSan > 0 && (
+                                <th className="text-end fw-bold">Giá trị tài sản</th>
+                              )}
                               <th className="text-end fw-bold">Tổng vốn ròng</th>
                             </tr>
                           </thead>
@@ -98,9 +100,11 @@ const ResultsTable = ({ results, onUpdateWithdrawal }) => {
                                 <td className={`text-end fw-bold ${sub.gocThucTe >= 0 ? 'text-success' : 'text-danger'}`}>
                                   {formatMoneyStr(sub.gocThucTe)}
                                 </td>
-                                <td className="text-end fw-bold text-info">
-                                  {formatMoneyStr(sub.giaTriTaiSan)}
-                                </td>
+                                {sub.giaTriTaiSan > 0 && (
+                                  <td className="text-end fw-bold text-info">
+                                    {formatMoneyStr(sub.giaTriTaiSan)}
+                                  </td>
+                                )}
                                 <td className={`text-end fw-bold ${sub.totalNetCapital >= 0 ? 'text-success' : 'text-danger'}`}>
                                   {formatMoneyStr(sub.totalNetCapital)}
                                 </td>

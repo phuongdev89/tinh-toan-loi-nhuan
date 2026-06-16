@@ -102,64 +102,99 @@ const Sidebar = ({ inputs, setInputs, summary }) => {
               ))}
             </div>
 
-            <MoneyInput 
-              label="Giá trị sản phẩm đang mua"
-              value={inputs.giaBds}
-              onChange={(val) => handleChange('giaBds', val)}
-            />
+            <div className="mt-3 p-2 bg-light rounded border mb-3">
+              <div className="form-check form-switch mb-0">
+                <input 
+                  className="form-check-input" 
+                  type="checkbox" 
+                  id="coSanPhamDauTu"
+                  checked={inputs.coSanPhamDauTu}
+                  onChange={(e) => handleChange('coSanPhamDauTu', e.target.checked)}
+                />
+                <label className="form-check-label fw-bold" htmlFor="coSanPhamDauTu">
+                  CÓ SẢN PHẨM ĐỂ MUA
+                </label>
+              </div>
+            </div>
 
-            <div className="row g-2 mb-2">
-              <div className="col-6">
+            {inputs.coSanPhamDauTu && (
+              <>
                 <MoneyInput 
-                  label="Số tiền phải trả ngay"
-                  value={inputs.tienPhaiTra}
-                  onChange={(val) => handleChange('tienPhaiTra', val)}
+                  label="Giá trị sản phẩm đang mua"
+                  value={inputs.giaBds}
+                  onChange={(val) => handleChange('giaBds', val)}
                 />
-              </div>
-              <div className="col-6">
-                <label className="form-label">Còn nợ người bán</label>
-                <input 
-                  type="text" 
-                  className="form-control readonly-money text-danger" 
-                  value={formatMoneyStr(summary.tienNoLai)} 
-                  readOnly 
-                />
-              </div>
-            </div>
 
-            <div className="row g-1 mb-2">
-              <div className="col-4">
-                <label className="form-label">Lãi nợ (%/năm)</label>
-                <input 
-                  type="number" 
-                  className="form-control text-end" 
-                  value={inputs.laiSuatNoLai}
-                  onChange={(e) => handleChange('laiSuatNoLai', e.target.value)}
-                  step="0.1"
-                />
-              </div>
-              <div className="col-3">
-                <label className="form-label">Hạn (tháng)</label>
-                <input 
-                  type="number" 
-                  className="form-control text-end" 
-                  value={inputs.thoiGianNo}
-                  onChange={(e) => handleChange('thoiGianNo', e.target.value)}
-                />
-              </div>
-              <div className="col-5">
-                <label className="form-label text-primary">Phương án trả lãi</label>
-                <select 
-                  className="form-select border-primary fw-bold" 
-                  style={{ fontSize: '0.78rem' }}
-                  value={inputs.hinhThucTraLaiNo}
-                  onChange={(e) => handleChange('hinhThucTraLaiNo', e.target.value)}
-                >
-                  <option value="thang">Trả từng tháng</option>
-                  <option value="cuoi">Tất toán cuối</option>
-                </select>
-              </div>
-            </div>
+                <div className="row g-2 mb-2">
+                  <div className="col-6">
+                    <MoneyInput 
+                      label="Số tiền phải trả ngay"
+                      value={inputs.tienPhaiTra}
+                      onChange={(val) => handleChange('tienPhaiTra', val)}
+                    />
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Còn nợ người bán</label>
+                    <input 
+                      type="text" 
+                      className="form-control readonly-money text-danger" 
+                      value={formatMoneyStr(summary.tienNoLai)} 
+                      readOnly 
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      id="coThuLaiNo"
+                      checked={inputs.coThuLaiNo}
+                      onChange={(e) => handleChange('coThuLaiNo', e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="coThuLaiNo">
+                      Thu lãi trên số nợ lại
+                    </label>
+                  </div>
+                </div>
+
+                {inputs.coThuLaiNo && (
+                  <div className="row g-1 mb-2">
+                    <div className="col-4">
+                      <label className="form-label">Lãi nợ (%/năm)</label>
+                      <input 
+                        type="number" 
+                        className="form-control text-end" 
+                        value={inputs.laiSuatNoLai}
+                        onChange={(e) => handleChange('laiSuatNoLai', e.target.value)}
+                        step="0.1"
+                      />
+                    </div>
+                    <div className="col-3">
+                      <label className="form-label">Hạn (tháng)</label>
+                      <input 
+                        type="number" 
+                        className="form-control text-end" 
+                        value={inputs.thoiGianNo}
+                        onChange={(e) => handleChange('thoiGianNo', e.target.value)}
+                      />
+                    </div>
+                    <div className="col-5">
+                      <label className="form-label text-primary">Trả lãi</label>
+                      <select 
+                        className="form-select border-primary fw-bold" 
+                        value={inputs.hinhThucTraLaiNo}
+                        onChange={(e) => handleChange('hinhThucTraLaiNo', e.target.value)}
+                      >
+                        <option value="thang">Từng tháng</option>
+                        <option value="cuoi">Tất toán cuối</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             <div className="alert alert-warning p-2 mb-2 rounded-3 border-0" style={{ fontSize: '0.8rem' }}>
               <div className="fw-bold text-warning-emphasis mb-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>
@@ -189,9 +224,19 @@ const Sidebar = ({ inputs, setInputs, summary }) => {
               />
             </div>
 
-            <div className="row g-2">
-              <div className="col-6">
-                <label className="form-label">Lãi đầu tư (%/tháng)</label>
+            <div className="row g-2 mb-3">
+              <div className="col-4">
+                <label className="form-label fw-bold">Số chu kỳ</label>
+                <input 
+                  type="number" 
+                  className="form-control text-end border-primary" 
+                  value={inputs.soChuKyDauTu}
+                  onChange={(e) => handleChange('soChuKyDauTu', parseInt(e.target.value) || 0)}
+                  min="1"
+                />
+              </div>
+              <div className="col-4">
+                <label className="form-label fw-bold">Lãi (%/tháng)</label>
                 <input 
                   type="number" 
                   className="form-control text-end" 
@@ -200,19 +245,26 @@ const Sidebar = ({ inputs, setInputs, summary }) => {
                   step="0.1"
                 />
               </div>
-              <div className="col-6">
-                <label className="form-label text-success">Kỳ hạn 1 Block</label>
+              <div className="col-4">
+                <label className="form-label fw-bold text-success">Block</label>
                 <select 
                   className="form-select border-success fw-bold"
                   value={inputs.blockDauTu}
                   onChange={(e) => handleChange('blockDauTu', parseInt(e.target.value) || 0)}
                 >
-                  <option value={6}>6 Tháng</option>
-                  <option value={9}>9 Tháng</option>
-                  <option value={12}>12 Tháng</option>
+                  <option value={6}>6 T</option>
+                  <option value={9}>9 T</option>
+                  <option value={12}>12 T</option>
                 </select>
               </div>
             </div>
+
+            {inputs.coSanPhamDauTu && inputs.soChuKyDauTu * inputs.blockDauTu < inputs.thoiGianNo && (
+              <div className="alert alert-danger p-2 mb-2" style={{ fontSize: '0.75rem' }}>
+                <i className="fa-solid fa-circle-exclamation me-1"></i>
+                Số chu kỳ ({inputs.soChuKyDauTu * inputs.blockDauTu} tháng) phải ≥ Hạn nợ ({inputs.thoiGianNo} tháng)
+              </div>
+            )}
           </form>
         </div>
       </div>
