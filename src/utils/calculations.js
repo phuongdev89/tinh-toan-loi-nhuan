@@ -59,10 +59,9 @@ export const calculatePeriodInterest = (params) => {
       totalInterestGoc += (amount * rate / data.daysInYear) * data.days;
     });
     
-    // Luôn tính lãi nợ chủ nhà theo tháng để có số liệu, 
-    // nhưng việc có cộng vào tổng chi trả định kỳ hay không phụ thuộc vào hinhThucTraLaiNo và coThuLaiNo
+    // Lãi nợ người bán tính chẵn theo tháng (1/12 năm)
     if (coThuLaiNo) {
-      totalInterestNo += (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days;
+      totalInterestNo += (tienNoLai * laiSuatNoLaiNam / 12);
     }
   }
 
@@ -163,9 +162,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
     if (isLastBlock) {
       let totalInterestNoAccumulated = 0;
       if (hinhThucTraLaiNo === 'cuoi' && coThuLaiNo) {
-        for (let k = 0; k < monthData.length; k++) {
-          totalInterestNoAccumulated += (tienNoLai * laiSuatNoLaiNam / monthData[k].daysInYear) * monthData[k].days;
-        }
+        totalInterestNoAccumulated = (tienNoLai * laiSuatNoLaiNam / 12) * totalMonthsProject;
       }
       cashAtEndBeforeWithdraw -= (tienNoLai + Math.round(totalInterestNoAccumulated));
     }
@@ -194,7 +191,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
 
       let laiNoThangThucTe = 0;
       if (hinhThucTraLaiNo === 'thang' && coThuLaiNo) {
-        laiNoThangThucTe = (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days;
+        laiNoThangThucTe = (tienNoLai * laiSuatNoLaiNam / 12);
       }
       
       const interestPaidThisMonth = Math.round(laiGocThang + laiNoThangThucTe);
@@ -208,9 +205,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
         // Cuối dự án hoặc không có sản phẩm: không còn nợ gốc
         let totalInterestNoAccumulated = 0;
         if (isLastBlock && hinhThucTraLaiNo === 'cuoi' && coThuLaiNo) {
-          for (let k = 0; k < monthData.length; k++) {
-            totalInterestNoAccumulated += (tienNoLai * laiSuatNoLaiNam / monthData[k].daysInYear) * monthData[k].days;
-          }
+          totalInterestNoAccumulated = (tienNoLai * laiSuatNoLaiNam / 12) * totalMonthsProject;
         }
         if (isLastBlock) {
             cashEnd -= (tienNoLai + Math.round(totalInterestNoAccumulated));
@@ -251,7 +246,7 @@ export const calculateFullProject = (inputs, manualWithdrawals = {}) => {
       subTable,
       isLastBlock,
       totalInterestNoAccumulated: isLastBlock && hinhThucTraLaiNo === 'cuoi' && coThuLaiNo ? Math.round(
-        monthData.reduce((acc, data) => acc + (tienNoLai * laiSuatNoLaiNam / data.daysInYear) * data.days, 0)
+        (tienNoLai * laiSuatNoLaiNam / 12) * totalMonthsProject
       ) : 0
     });
 
